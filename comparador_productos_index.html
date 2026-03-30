@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#ffffff" />
+  <title>Comparador de Productos</title>
+  <style>
+    :root {
+      --bg: #f4f6f8;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --border: #d1d5db;
+      --accent: #111827;
+      --ok: #166534;
+      --ok-bg: #dcfce7;
+      --warn: #92400e;
+      --warn-bg: #fef3c7;
+      --shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+      --radius: 18px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: linear-gradient(180deg, #f9fafb 0%, #eef2f7 100%);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 24px 16px 40px;
+    }
+
+    .app {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .header h1 {
+      margin: 0 0 8px;
+      font-size: 1.9rem;
+      line-height: 1.2;
+    }
+
+    .header p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.98rem;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid rgba(209, 213, 219, 0.7);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 18px;
+    }
+
+    .card h2 {
+      margin: 0 0 16px;
+      font-size: 1.2rem;
+    }
+
+    .field {
+      margin-bottom: 14px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+
+    input,
+    select {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      font-size: 1rem;
+      background: #fff;
+      color: var(--text);
+    }
+
+    input:focus,
+    select:focus {
+      outline: none;
+      border-color: #9ca3af;
+      box-shadow: 0 0 0 4px rgba(156, 163, 175, 0.18);
+    }
+
+    .promo-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      border: none;
+      border-radius: 12px;
+      padding: 13px 16px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .primary {
+      background: var(--accent);
+      color: white;
+      flex: 1;
+    }
+
+    .secondary {
+      background: #e5e7eb;
+      color: var(--text);
+    }
+
+    .results {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr 1fr;
+      gap: 16px;
+      align-items: stretch;
+    }
+
+    .highlight {
+      border-radius: var(--radius);
+      padding: 18px;
+      border: 1px solid transparent;
+    }
+
+    .highlight.ok {
+      background: var(--ok-bg);
+      color: var(--ok);
+      border-color: #86efac;
+    }
+
+    .highlight.warn {
+      background: var(--warn-bg);
+      color: var(--warn);
+      border-color: #fcd34d;
+    }
+
+    .result-title {
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      opacity: 0.85;
+      margin-bottom: 8px;
+      font-weight: 700;
+    }
+
+    .result-main {
+      font-size: 1.35rem;
+      font-weight: 800;
+      line-height: 1.25;
+      margin-bottom: 8px;
+    }
+
+    .detail-list {
+      display: grid;
+      gap: 8px;
+      font-size: 0.96rem;
+    }
+
+    .detail-list div {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      border-bottom: 1px dashed rgba(107, 114, 128, 0.25);
+      padding-bottom: 6px;
+    }
+
+    .detail-list div:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .muted {
+      color: var(--muted);
+    }
+
+    .footnote {
+      margin-top: 14px;
+      color: var(--muted);
+      font-size: 0.9rem;
+      text-align: center;
+    }
+
+    @media (max-width: 760px) {
+      .grid,
+      .results {
+        grid-template-columns: 1fr;
+      }
+
+      body {
+        padding: 16px 12px 28px;
+      }
+
+      .header h1 {
+        font-size: 1.6rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="header">
+      <h1>Comparador de Productos</h1>
+      <p>Ingresa dos productos y descubre cuál conviene más según su precio unitario real.</p>
+    </header>
+
+    <section class="grid">
+      <article class="card">
+        <h2>Producto A</h2>
+
+        <div class="field">
+          <label for="nombreA" >Nombre</label>
+          <input id="nombreA" type="text" placeholder="Ej: Arroz marca A" value="A" readonly />
+        </div>
+
+        <div class="field">
+          <label for="precioA">Precio</label>
+          <input id="precioA" type="number" min="0" step="0.01" placeholder="Ej: 3290" />
+        </div>
+
+        <div class="field">
+          <label for="cantidadA">Cantidad</label>
+          <input id="cantidadA" type="number" min="0" step="0.001" placeholder="Ej: 500" />
+        </div>
+
+        <div class="field">
+          <label for="unidadA">Unidad de medida</label>
+          <select id="unidadA">
+            <option value="unidades">Unidades</option>
+            <option value="ml">Volumen (ml)</option>
+            <option value="g" selected>Gramos (g)</option>
+            <option value="m">Metros (m)</option>
+            <option value="piezas">Piezas</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>Promoción</label>
+          <div class="promo-grid">
+            <input id="promoPagaA" type="number" min="1" step="1" placeholder="Paga" value="1" />
+            <input id="promoLlevaA" type="number" min="1" step="1" placeholder="Lleva" value="1" />
+          </div>
+          <small class="muted">Ejemplo 2x1: paga 1 y lleva 2. Sin promoción: paga 1 y lleva 1.</small>
+        </div>
+      </article>
+
+      <article class="card">
+        <h2>Producto B</h2>
+
+        <div class="field">
+          <label for="nombreB" >Nombre</label>
+          <input id="nombreB" type="text" placeholder="Ej: Arroz marca B" value="B" readonly />
+        </div>
+
+        <div class="field">
+          <label for="precioB">Precio</label>
+          <input id="precioB" type="number" min="0" step="0.01" placeholder="Ej: 4190" />
+        </div>
+
+        <div class="field">
+          <label for="cantidadB">Cantidad</label>
+          <input id="cantidadB" type="number" min="0" step="0.001" placeholder="Ej: 1000" />
+        </div>
+
+        <div class="field">
+          <label for="unidadB">Unidad de medida</label>
+          <select id="unidadB">
+            <option value="unidades">Unidades</option>
+            <option value="ml">Volumen (ml)</option>
+            <option value="g" selected>Gramos (g)</option>
+            <option value="m">Metros (m)</option>
+            <option value="piezas">Piezas</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>Promoción</label>
+          <div class="promo-grid">
+            <input id="promoPagaB" type="number" min="1" step="1" placeholder="Paga" value="1" />
+            <input id="promoLlevaB" type="number" min="1" step="1" placeholder="Lleva" value="1" />
+          </div>
+          <small class="muted">Ejemplo 3x2: paga 2 y lleva 3.</small>
+        </div>
+      </article>
+    </section>
+
+    <section class="card">
+      <div class="actions">
+        <button class="primary" id="btnCalcular">Comparar productos</button>
+        <button class="secondary" id="btnLimpiar" type="button">Limpiar</button>
+      </div>
+    </section>
+
+    <section class="results" id="resultadoPanel" style="margin-top: 16px; display: none;">
+      <div class="highlight ok" id="resultadoGeneral">
+        <div class="result-title">Resultado</div>
+        <div class="result-main" id="resultadoTexto"></div>
+        <div id="resultadoDetalle"></div>
+      </div>
+
+      <div class="card">
+        <h2 style="margin-bottom: 14px;">Resumen A</h2>
+        <div class="detail-list" id="resumenA"></div>
+      </div>
+
+      <div class="card">
+        <h2 style="margin-bottom: 14px;">Resumen B</h2>
+        <div class="detail-list" id="resumenB"></div>
+      </div>
+    </section>
+
+    <p class="footnote">Consejo: compara productos con la misma unidad de medida para obtener una comparación justa.</p>
+  </div>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+
+    function toNumber(value) {
+      const n = parseFloat(value);
+      return Number.isFinite(n) ? n : 0;
+    }
+
+    function money(value) {
+      return new Intl.NumberFormat('es-CL', {
+        style: 'currency',
+        currency: 'CLP',
+        maximumFractionDigits: 2
+      }).format(value);
+    }
+
+    function number(value) {
+      return new Intl.NumberFormat('es-CL', {
+        maximumFractionDigits: 3
+      }).format(value);
+    }
+
+    function getProductData(prefix) {
+      const nombre = $("nombre" + prefix).value.trim() || `Producto ${prefix}`;
+      const precio = toNumber($("precio" + prefix).value);
+      const cantidad = toNumber($("cantidad" + prefix).value);
+      const unidad = $("unidad" + prefix).value;
+      const paga = Math.max(1, Math.floor(toNumber($("promoPaga" + prefix).value) || 1));
+      const lleva = Math.max(1, Math.floor(toNumber($("promoLleva" + prefix).value) || 1));
+
+      const factorPromo = lleva / paga;
+      const cantidadEfectiva = cantidad * factorPromo;
+      const precioUnitario = cantidadEfectiva > 0 ? precio / cantidadEfectiva : 0;
+
+      return {
+        nombre,
+        precio,
+        cantidad,
+        unidad,
+        paga,
+        lleva,
+        factorPromo,
+        cantidadEfectiva,
+        precioUnitario
+      };
+    }
+
+    function sameUnit(a, b) {
+      return a.unidad === b.unidad;
+    }
+
+    function renderSummary(targetId, product) {
+      $(targetId).innerHTML = `
+        <div><span>Nombre</span><strong>${product.nombre}</strong></div>
+        <div><span>Precio</span><strong>${money(product.precio)}</strong></div>
+        <div><span>Cantidad base</span><strong>${number(product.cantidad)} ${product.unidad}</strong></div>
+        <div><span>Promoción</span><strong>Paga ${product.paga} / Lleva ${product.lleva}</strong></div>
+        <div><span>Cantidad efectiva</span><strong>${number(product.cantidadEfectiva)} ${product.unidad}</strong></div>
+        <div><span>Precio unitario</span><strong>${money(product.precioUnitario)} / ${product.unidad}</strong></div>
+      `;
+    }
+
+    function compare() {
+      const a = getProductData('A');
+      const b = getProductData('B');
+
+      if (a.precio <= 0 || a.cantidad <= 0 || b.precio <= 0 || b.cantidad <= 0) {
+        alert('Debes ingresar precio y cantidad válidos para ambos productos.');
+        return;
+      }
+
+      renderSummary('resumenA', a);
+      renderSummary('resumenB', b);
+
+      const panel = $('resultadoPanel');
+      const texto = $('resultadoTexto');
+      const detalle = $('resultadoDetalle');
+      const box = $('resultadoGeneral');
+
+      panel.style.display = 'grid';
+
+      if (!sameUnit(a, b)) {
+        texto.textContent = 'No es una comparación exacta';
+        detalle.innerHTML = `
+          <p>Los productos usan unidades distintas (<strong>${a.unidad}</strong> vs <strong>${b.unidad}</strong>).</p>
+          <p>Puedo mostrar los precios unitarios, pero la comparación directa puede no ser justa.</p>
+        `;
+        box.className = 'highlight warn';
+        return;
+      }
+
+      const diff = Math.abs(a.precioUnitario - b.precioUnitario);
+
+      if (diff < 0.000001) {
+        texto.textContent = 'Ambos productos convienen igual';
+        detalle.innerHTML = `
+          <p>Los dos tienen prácticamente el mismo precio unitario.</p>
+          <p><strong>${money(a.precioUnitario)}</strong> por ${a.unidad}.</p>
+        `;
+        box.className = 'highlight warn';
+        return;
+      }
+
+      const winner = a.precioUnitario < b.precioUnitario ? a : b;
+      const loser = winner === a ? b : a;
+      const ahorroPorUnidad = loser.precioUnitario - winner.precioUnitario;
+      const porcentaje = loser.precioUnitario > 0
+        ? ((ahorroPorUnidad / loser.precioUnitario) * 100)
+        : 0;
+
+      texto.textContent = `Conviene más: ${winner.nombre}`;
+      detalle.innerHTML = `
+        <p><strong>${winner.nombre}</strong> tiene un precio unitario menor.</p>
+        <p>Precio unitario ganador: <strong>${money(winner.precioUnitario)}</strong> por ${winner.unidad}.</p>
+        <p>Ahorro aproximado: <strong>${money(ahorroPorUnidad)}</strong> por ${winner.unidad} (${number(porcentaje)}%).</p>
+      `;
+      box.className = 'highlight ok';
+    }
+
+    function clearForm() {
+      [
+        'nombreA','precioA','cantidadA','promoPagaA','promoLlevaA',
+        'nombreB','precioB','cantidadB','promoPagaB','promoLlevaB'
+      ].forEach((id) => $(id).value = '');
+
+      $('unidadA').value = 'unidades';
+      $('unidadB').value = 'unidades';
+      $('promoPagaA').value = 1;
+      $('promoLlevaA').value = 1;
+      $('promoPagaB').value = 1;
+      $('promoLlevaB').value = 1;
+      $('resultadoPanel').style.display = 'none';
+    }
+
+    $('btnCalcular').addEventListener('click', compare);
+    $('btnLimpiar').addEventListener('click', clearForm);
+  </script>
+</body>
+</html>
