@@ -244,7 +244,7 @@
 
         <div class="field">
           <label for="nombreA" >Nombre</label>
-          <input id="nombreA" type="text" placeholder="Ej: Arroz marca A" value="A" readonly />
+          <input id="nombreA" type="text" placeholder="Ej: Arroz marca A" value="Producto A" readonly />
         </div>
 
         <div class="field">
@@ -290,7 +290,7 @@
 
         <div class="field">
           <label for="nombreB" >Nombre</label>
-          <input id="nombreB" type="text" placeholder="Ej: Arroz marca B" value="B" readonly />
+          <input id="nombreB" type="text" placeholder="Ej: Arroz marca B" value="Producto B" readonly />
         </div>
 
         <div class="field">
@@ -484,8 +484,8 @@
 
     function clearForm() {
       [
-        'nombreA','precioA','cantidadA','volumenA','promoPagaA','promoLlevaA',
-        'nombreB','precioB','cantidadB','volumenB','promoPagaB','promoLlevaB'
+        'precioA','cantidadA','volumenA','promoPagaA','promoLlevaA',
+        'precioB','cantidadB','volumenB','promoPagaB','promoLlevaB'
       ].forEach((id) => $(id).value = '');
 
       $('unidadA').value = 'unidades';
