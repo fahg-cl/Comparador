@@ -244,7 +244,7 @@
 
         <div class="field">
           <label for="nombreA" >Nombre</label>
-          <input id="nombreA" type="text" placeholder="Ej: Arroz marca A" value="Producto A" readonly />
+          <input id="nombreA" type="text" placeholder="Ej: Arroz marca A" value="Producto A"  />
         </div>
 
         <div class="field">
@@ -257,12 +257,17 @@
         <div class="field">
           <label for="unidadA">Unidad de medida</label>
           <select id="unidadA">
-            <option value="unidades">Unidades</option>
-            <option value="ml">Volumen (ml)</option>
-            <option value="g" selected>Gramos (g)</option>
-            <option value="m">Metros (m)</option>
-            <option value="piezas">Piezas</option>
+            <option value="Unidades">Unidades</option>
+            <option value="Litros">Volumen (ml)</option>
+            <option value="Gramos" selected>Gramos (g)</option>
+            <option value="Metros">Metros (m)</option>
+            <option value="Piezas">Piezas</option>
           </select>
+        </div>
+
+        <div class="field">
+          <label for="volumenA">Volumen x Unidad</label>
+          <input id="volumenA" type="number" min="0" step="0.001" placeholder="Ej: 50" />
         </div>
 
         <div class="field">
@@ -270,10 +275,7 @@
           <input id="cantidadA" type="number" min="0" step="0.001" placeholder="Ej: 18" />
         </div>
 
-        <div class="field">
-          <label for="volumenA">Volumen x Unidad</label>
-          <input id="volumenA" type="number" min="0" step="0.001" placeholder="Ej: 50" />
-        </div>
+
 
         <div class="field">
           <label>Promoción</label>
@@ -290,7 +292,7 @@
 
         <div class="field">
           <label for="nombreB" >Nombre</label>
-          <input id="nombreB" type="text" placeholder="Ej: Arroz marca B" value="Producto B" readonly />
+          <input id="nombreB" type="text" placeholder="Ej: Arroz marca B" value="Producto B" />
         </div>
 
         <div class="field">
@@ -303,23 +305,25 @@
         <div class="field">
           <label for="unidadB">Unidad de medida</label>
           <select id="unidadB">
-            <option value="unidades">Unidades</option>
-            <option value="ml">Volumen (ml)</option>
-            <option value="g" selected>Gramos (g)</option>
-            <option value="m">Metros (m)</option>
-            <option value="piezas">Piezas</option>
+            <option value="Unidades">Unidades</option>
+            <option value="Litros">Volumen (ml)</option>
+            <option value="Gramos" selected>Gramos (g)</option>
+            <option value="Metros">Metros (m)</option>
+            <option value="Piezas">Piezas</option>
           </select>
-        </div>
-
-        <div class="field">
-          <label for="cantidadB">Cantidad</label>
-          <input id="cantidadB" type="number" min="0" step="0.001" placeholder="Ej: 24" />
         </div>
 
         <div class="field">
           <label for="volumenB">Volumen x Unidad</label>
           <input id="volumenB" type="number" min="0" step="0.001" placeholder="Ej: 25" />
         </div>
+
+
+        <div class="field">
+          <label for="cantidadB">Cantidad</label>
+          <input id="cantidadB" type="number" min="0" step="0.001" placeholder="Ej: 24" />
+        </div>
+
 
         <div class="field">
           <label>Promoción</label>
@@ -363,24 +367,77 @@
   <script>
     const $ = (id) => document.getElementById(id);
 
-    function toNumber(value) {
-      const n = parseFloat(value);
-      return Number.isFinite(n) ? n : 0;
-    }
+    const STORAGE_KEY = 'comparador_productos_formulario_v1';
 
-    function money(value) {
-      return new Intl.NumberFormat('es-CL', {
-        style: 'currency',
-        currency: 'CLP',
-        maximumFractionDigits: 2
-      }).format(value);
-    }
+    //const HISTORY_KEY = 'comparador_productos_historial_v1';
 
-    function number(value) {
-      return new Intl.NumberFormat('es-CL', {
-        maximumFractionDigits: 3
-      }).format(value);
+  function toNumber(value) {
+    const n = parseFloat(value);
+    return Number.isFinite(n) ? n : 0;
+  }
+
+  function money(value) {
+    return new Intl.NumberFormat('es-CL', {
+      style: 'currency',
+      currency: 'CLP',
+      maximumFractionDigits: 2
+    }).format(value);
+  }
+
+  function number(value) {
+    return new Intl.NumberFormat('es-CL', {
+      maximumFractionDigits: 3
+    }).format(value);
+  }
+
+  function saveFormData() {
+    const data = {
+      nombreA: $('nombreA').value,
+      precioA: $('precioA').value,
+      unidadA: $('unidadA').value,
+      cantidadA: $('cantidadA').value,
+      volumenA: $('volumenA').value,
+      promoPagaA: $('promoPagaA').value,
+      promoLlevaA: $('promoLlevaA').value,
+
+      nombreB: $('nombreB').value,
+      precioB: $('precioB').value,
+      unidadB: $('unidadB').value,
+      cantidadB: $('cantidadB').value,
+      volumenB: $('volumenB').value,
+      promoPagaB: $('promoPagaB').value,
+      promoLlevaB: $('promoLlevaB').value
+    };
+
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  }
+
+  function loadFormData() {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return;
+
+    try {
+      const data = JSON.parse(raw);
+
+      $('nombreA').value = data.nombreA || '';
+      $('precioA').value = data.precioA || '';
+      $('unidadA').value = data.unidadA || 'g';
+      $('cantidadA').value = data.cantidadA || '';
+      $('volumenA').value = data.volumenA || '';
+      $('promoPagaA').value = data.promoPagaA || '1';
+      $('promoLlevaA').value = data.promoLlevaA || '1';
+
+      $('nombreB').value = data.nombreB || '';
+      $('precioB').value = data.precioB || '';
+      $('unidadB').value = data.unidadB || 'g';
+      $('cantidadB').value = data.cantidadB || '';
+      $('volumenB').value = data.volumenB || '';
+      $('promoPagaB').value = data.promoPagaB || '1';
+      $('promoLlevaB').value = data.promoLlevaB || '1';
+    } catch (error) {
+      console.error('No se pudo cargar el formulario guardado:', error);
     }
+  }
 
     function getProductData(prefix) {
       const nombre = $("nombre" + prefix).value.trim() || `Producto ${prefix}`;
@@ -418,7 +475,8 @@
         <div><span>Nombre</span><strong>${product.nombre}</strong></div>
         <div><span>Precio</span><strong>${money(product.precio)}</strong></div>
         <div><span>Cantidad base</span><strong>${number(product.cantidad)} ${product.unidad}</strong></div>
-        <div><span>Volumen x Unidad</span><strong>${number(product.volumen)}</strong></div>
+        <div><span>N° de unidades</span><strong>${number(product.cantidad)}</strong></div>
+        <div><span>${product.unidad} x Unidad</span><strong>${number(product.volumen)}</strong></div>
         <div><span>Promoción</span><strong>Paga ${product.paga} / Lleva ${product.lleva}</strong></div>
         <div><span>Cantidad efectiva</span><strong>${number(product.cantidadEfectiva)} ${product.unidad}</strong></div>
         <div><span>Precio unitario</span><strong>${money(product.precioUnitario)} / ${product.unidad}</strong></div>
@@ -429,8 +487,8 @@
       const a = getProductData('A');
       const b = getProductData('B');
 
-      if (a.precio <= 0 || a.cantidad <= 0 || a.volumen <= 0 || b.precio <= 0 || b.cantidad <= 0) {
-        alert('Debes ingresar precio y cantidad válidos para ambos productos.');
+      if (a.precio <= 0 || a.cantidad <= 0 || a.volumen <= 0 || b.precio <= 0 || b.cantidad <= 0 || b.volumen <= 0 ) {
+        alert('Debes ingresar precio, cantidad y volumen válidos para ambos productos.');
         return;
       }
 
@@ -484,21 +542,35 @@
 
     function clearForm() {
       [
-        'precioA','cantidadA','volumenA','promoPagaA','promoLlevaA',
-        'precioB','cantidadB','volumenB','promoPagaB','promoLlevaB'
+        'nombreA','precioA','cantidadA','volumenA','promoPagaA','promoLlevaA',
+        'nombreB','precioB','cantidadB','volumenB','promoPagaB','promoLlevaB'
       ].forEach((id) => $(id).value = '');
 
-      $('unidadA').value = 'unidades';
-      $('unidadB').value = 'unidades';
+      $('nombreA').value = 'Producto A';
+      $('nombreB').value = 'Producto B';
+      $('unidadA').value = 'g';
+      $('unidadB').value = 'g';
       $('promoPagaA').value = 1;
       $('promoLlevaA').value = 1;
       $('promoPagaB').value = 1;
       $('promoLlevaB').value = 1;
       $('resultadoPanel').style.display = 'none';
+      localStorage.removeItem(STORAGE_KEY);
     }
 
     $('btnCalcular').addEventListener('click', compare);
     $('btnLimpiar').addEventListener('click', clearForm);
+
+  [
+    'nombreA','precioA', 'unidadA', 'cantidadA', 'volumenA', 'promoPagaA', 'promoLlevaA',
+    'nombreB','precioB', 'unidadB', 'cantidadB', 'volumenB', 'promoPagaB', 'promoLlevaB'
+  ].forEach((id) => {
+    $(id).addEventListener('input', saveFormData);
+    $(id).addEventListener('change', saveFormData);
+  });
+
+  loadFormData();
+
   </script>
 </body>
 </html>
