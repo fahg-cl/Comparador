@@ -252,10 +252,7 @@
           <input id="precioA" type="number" min="0" step="0.01" placeholder="Ej: 3290" />
         </div>
 
-        <div class="field">
-          <label for="cantidadA">Cantidad</label>
-          <input id="cantidadA" type="number" min="0" step="0.001" placeholder="Ej: 500" />
-        </div>
+
 
         <div class="field">
           <label for="unidadA">Unidad de medida</label>
@@ -266,6 +263,16 @@
             <option value="m">Metros (m)</option>
             <option value="piezas">Piezas</option>
           </select>
+        </div>
+
+        <div class="field">
+          <label for="cantidadA">Cantidad</label>
+          <input id="cantidadA" type="number" min="0" step="0.001" placeholder="Ej: 18" />
+        </div>
+
+        <div class="field">
+          <label for="volumenA">Volumen x Unidad</label>
+          <input id="volumenA" type="number" min="0" step="0.001" placeholder="Ej: 50" />
         </div>
 
         <div class="field">
@@ -291,10 +298,7 @@
           <input id="precioB" type="number" min="0" step="0.01" placeholder="Ej: 4190" />
         </div>
 
-        <div class="field">
-          <label for="cantidadB">Cantidad</label>
-          <input id="cantidadB" type="number" min="0" step="0.001" placeholder="Ej: 1000" />
-        </div>
+
 
         <div class="field">
           <label for="unidadB">Unidad de medida</label>
@@ -305,6 +309,16 @@
             <option value="m">Metros (m)</option>
             <option value="piezas">Piezas</option>
           </select>
+        </div>
+
+        <div class="field">
+          <label for="cantidadB">Cantidad</label>
+          <input id="cantidadB" type="number" min="0" step="0.001" placeholder="Ej: 24" />
+        </div>
+
+        <div class="field">
+          <label for="volumenB">Volumen x Unidad</label>
+          <input id="volumenB" type="number" min="0" step="0.001" placeholder="Ej: 25" />
         </div>
 
         <div class="field">
@@ -372,18 +386,20 @@
       const nombre = $("nombre" + prefix).value.trim() || `Producto ${prefix}`;
       const precio = toNumber($("precio" + prefix).value);
       const cantidad = toNumber($("cantidad" + prefix).value);
+      const volumen = toNumber($("volumen" + prefix).value);
       const unidad = $("unidad" + prefix).value;
       const paga = Math.max(1, Math.floor(toNumber($("promoPaga" + prefix).value) || 1));
       const lleva = Math.max(1, Math.floor(toNumber($("promoLleva" + prefix).value) || 1));
 
       const factorPromo = lleva / paga;
-      const cantidadEfectiva = cantidad * factorPromo;
+      const cantidadEfectiva = cantidad * volumen * factorPromo;
       const precioUnitario = cantidadEfectiva > 0 ? precio / cantidadEfectiva : 0;
 
       return {
         nombre,
         precio,
         cantidad,
+        volumen,
         unidad,
         paga,
         lleva,
@@ -402,6 +418,7 @@
         <div><span>Nombre</span><strong>${product.nombre}</strong></div>
         <div><span>Precio</span><strong>${money(product.precio)}</strong></div>
         <div><span>Cantidad base</span><strong>${number(product.cantidad)} ${product.unidad}</strong></div>
+        <div><span>Volumen x Unidad</span><strong>${number(product.volumen)}</strong></div>
         <div><span>Promoción</span><strong>Paga ${product.paga} / Lleva ${product.lleva}</strong></div>
         <div><span>Cantidad efectiva</span><strong>${number(product.cantidadEfectiva)} ${product.unidad}</strong></div>
         <div><span>Precio unitario</span><strong>${money(product.precioUnitario)} / ${product.unidad}</strong></div>
@@ -412,7 +429,7 @@
       const a = getProductData('A');
       const b = getProductData('B');
 
-      if (a.precio <= 0 || a.cantidad <= 0 || b.precio <= 0 || b.cantidad <= 0) {
+      if (a.precio <= 0 || a.cantidad <= 0 || a.volumen <= 0 || b.precio <= 0 || b.cantidad <= 0) {
         alert('Debes ingresar precio y cantidad válidos para ambos productos.');
         return;
       }
@@ -467,8 +484,8 @@
 
     function clearForm() {
       [
-        'nombreA','precioA','cantidadA','promoPagaA','promoLlevaA',
-        'nombreB','precioB','cantidadB','promoPagaB','promoLlevaB'
+        'nombreA','precioA','cantidadA','volumenA','promoPagaA','promoLlevaA',
+        'nombreB','precioB','cantidadB','volumenB','promoPagaB','promoLlevaB'
       ].forEach((id) => $(id).value = '');
 
       $('unidadA').value = 'unidades';
