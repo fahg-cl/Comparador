@@ -41,6 +41,36 @@ min-height: 100vh;
 padding: 24px 16px 40px;
 }
 
+
+.orden-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+.btn-orden {
+  width: 100%;
+  padding: 12px 0;
+  border-radius: 12px;
+  border: 1px solid #d1d5db;
+  background: #f3f4f6;
+  cursor: pointer;
+  font-weight: bold;
+  text-align: center;
+}
+
+@media (max-width: 500px) {
+  .orden-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.btn-orden.active {
+  background: #111827;
+  color: white;
+  border-color: #111827;
+}
+
 .btn-orden {
   padding: 10px 14px;
   border-radius: 10px;
@@ -369,11 +399,11 @@ font-size: 1.6rem;
             <h2 style="margin-bottom: 14px;">Historial de comparaciones</h2>
             <div class="field" style="margin-bottom: 12px;">
                 <label>Ordenar historial</label>
-                <div id="ordenHistorial" style="display:flex; gap:8px; flex-wrap:wrap;">
-                    <button type="button" class="btn-orden active" data-order="fecha_desc">⬇️</button>
-                    <button type="button" class="btn-orden" data-order="fecha_asc">⬆️</button>
-                    <button type="button" class="btn-orden" data-order="producto_asc">🔤</button>
-                    <button type="button" class="btn-orden" data-order="producto_desc">🔠</button>
+                <div id="ordenHistorial" class="orden-grid">
+                    <button type="button" class="btn-orden active" data-order="fecha_desc" title="Más reciente">⬇️📅</button>
+                    <button type="button" class="btn-orden" data-order="fecha_asc" title="Más antiguo">⬆️📅</button>
+                    <button type="button" class="btn-orden" data-order="producto_asc" title="Nombre A-Z">⬆️🧾</button>
+                    <button type="button" class="btn-orden" data-order="producto_desc" title="Nombre Z-A">⬇️🧾</button>
                 </div>
             </div>
             <div id="historialComparaciones" class="detail-list"></div>
