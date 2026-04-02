@@ -337,13 +337,23 @@
 
     </section>
     <article class="card">
-      <div class="field">
+    <div class="field">
         <label for="ubicacionComparacion">Ubicación</label>
-        <input id="ubicacionComparacion" type="text" placeholder="Ej: Jumbo Maipú, Lider, Feria, etc." />
+        <select id="ubicacionComparacion">
+          <option value="">Selecciona una ubicación</option>
+          <option value="__otro__">Otro...</option>
+        </select>
+
+
+      <div class="field" id="ubicacionOtraField" style="display: none;">
+        <label for="ubicacionOtra">Nueva ubicación</label>
+        <input id="ubicacionOtra" type="text" placeholder="Ej: Jumbo Maipú, Líder, Feria, etc." />
       </div>
+    </div>
+
     </article>
 
-    <section class="card">
+    <section class="card" style="margin-top: 16px;">
 <div class="actions">
   <button class="primary" id="btnCalcular">Comparar productos</button>
   <button class="secondary" id="btnGuardar" type="button">Guardar comparación</button>
@@ -380,8 +390,8 @@
     const $ = (id) => document.getElementById(id);
 
     const STORAGE_KEY = 'comparador_productos_formulario_v1';
-
     const HISTORY_KEY = 'comparador_productos_historial_v1';
+    const LOCATIONS_KEY = 'comparador_productos_ubicaciones_v1';
 
     $('btnGuardar').addEventListener('click', guardarComparacion);
     renderHistorial();
@@ -423,43 +433,50 @@ function saveFormData() {
     promoPagaB: $('promoPagaB').value,
     promoLlevaB: $('promoLlevaB').value,
 
-    ubicacionComparacion: $('ubicacionComparacion').value
+    ubicacionComparacion: $('ubicacionComparacion').value,
+    ubicacionOtra: $('ubicacionOtra').value
   };
 
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
 }
 
-  function loadFormData() {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return;
+function loadFormData() {
+  const raw = localStorage.getItem(STORAGE_KEY);
 
-    try {
-      const data = JSON.parse(raw);
+  renderLocationOptions();
 
-      $('ubicacionComparacion').value = data.ubicacionComparacion || '';
-      $('nombreA').value = data.nombreA || 'Producto A';
+  if (!raw) return;
 
+  try {
+    const data = JSON.parse(raw);
 
-      //$('nombreA').value = data.nombreA || '';
-      $('precioA').value = data.precioA || '';
-      $('unidadA').value = data.unidadA || 'Gramos';
-      $('cantidadA').value = data.cantidadA || '';
-      $('volumenA').value = data.volumenA || '';
-      $('promoPagaA').value = data.promoPagaA || '1';
-      $('promoLlevaA').value = data.promoLlevaA || '1';
+    $('nombreA').value = data.nombreA || 'Producto A';
+    $('precioA').value = data.precioA || '';
+    $('unidadA').value = data.unidadA || 'Gramos';
+    $('cantidadA').value = data.cantidadA || '';
+    $('volumenA').value = data.volumenA || '';
+    $('promoPagaA').value = data.promoPagaA || '1';
+    $('promoLlevaA').value = data.promoLlevaA || '1';
 
-      $('nombreB').value = data.nombreB || 'Producto B';
-      //$('nombreB').value = data.nombreB || '';
-      $('precioB').value = data.precioB || '';
-      $('unidadB').value = data.unidadB || 'Gramos';
-      $('cantidadB').value = data.cantidadB || '';
-      $('volumenB').value = data.volumenB || '';
-      $('promoPagaB').value = data.promoPagaB || '1';
-      $('promoLlevaB').value = data.promoLlevaB || '1';
-    } catch (error) {
-      console.error('No se pudo cargar el formulario guardado:', error);
-    }
+    $('nombreB').value = data.nombreB || 'Producto B';
+    $('precioB').value = data.precioB || '';
+    $('unidadB').value = data.unidadB || 'Gramos';
+    $('cantidadB').value = data.cantidadB || '';
+    $('volumenB').value = data.volumenB || '';
+    $('promoPagaB').value = data.promoPagaB || '1';
+    $('promoLlevaB').value = data.promoLlevaB || '1';
+
+    const ubicacionGuardada =
+      data.ubicacionComparacion === '__otro__'
+        ? (data.ubicacionOtra || '')
+        : (data.ubicacionComparacion || '');
+
+    renderLocationOptions(ubicacionGuardada);
+  } catch (error) {
+    console.error('No se pudo cargar el formulario guardado:', error);
+    renderLocationOptions();
   }
+}
 
     function getProductData(prefix) {
       const nombre = $("nombre" + prefix).value.trim() || `Producto ${prefix}`;
@@ -496,8 +513,8 @@ function saveFormData() {
       $(targetId).innerHTML = `
         <div><span>Nombre</span><strong>${product.nombre}</strong></div>
         <div><span>Precio</span><strong>${money(product.precio)}</strong></div>
-        <div><span>Cantidad base</span><strong>${number(product.cantidad)} ${product.unidad}</strong></div>
         <div><span>N° de unidades</span><strong>${number(product.cantidad)}</strong></div>
+        <div><span>${product.unidad} por unidad</span><strong>${number(product.volumen)}</strong></div>
         <div><span>${product.unidad} x Unidad</span><strong>${number(product.volumen)}</strong></div>
         <div><span>Promoción</span><strong>Paga ${product.paga} / Lleva ${product.lleva}</strong></div>
         <div><span>Cantidad efectiva</span><strong>${number(product.cantidadEfectiva)} ${product.unidad}</strong></div>
@@ -562,37 +579,58 @@ function saveFormData() {
       box.className = 'highlight ok';
     }
 
-    function clearForm() {
-      [
-        'nombreA','precioA','cantidadA','volumenA','promoPagaA','promoLlevaA',
-        'nombreB','precioB','cantidadB','volumenB','promoPagaB','promoLlevaB',
-        'ubicacionComparacion'
-      ].forEach((id) => $(id).value = '');      
+function clearForm() {
+  $('nombreA').value = 'Producto A';
+  $('nombreB').value = 'Producto B';
 
-      $('ubicacionComparacion').value = '';
-      $('nombreA').value = 'Producto A';
-      $('nombreB').value = 'Producto B';
-      $('unidadA').value = 'Gramos';
-      $('unidadB').value = 'Gramos';
-      $('promoPagaA').value = 1;
-      $('promoLlevaA').value = 1;
-      $('promoPagaB').value = 1;
-      $('promoLlevaB').value = 1;
-      $('resultadoPanel').style.display = 'none';
-      localStorage.removeItem(STORAGE_KEY);
-    }
+  $('precioA').value = '';
+  $('cantidadA').value = '';
+  $('volumenA').value = '';
+
+  $('precioB').value = '';
+  $('cantidadB').value = '';
+  $('volumenB').value = '';
+
+  $('unidadA').value = 'Gramos';
+  $('unidadB').value = 'Gramos';
+
+  $('promoPagaA').value = 1;
+  $('promoLlevaA').value = 1;
+  $('promoPagaB').value = 1;
+  $('promoLlevaB').value = 1;
+
+  $('ubicacionOtra').value = '';
+  renderLocationOptions();
+
+  $('resultadoPanel').style.display = 'none';
+  localStorage.removeItem(STORAGE_KEY);
+}
 
     $('btnCalcular').addEventListener('click', compare);
     $('btnLimpiar').addEventListener('click', clearForm);
 
-  [
-    'nombreA','precioA', 'unidadA', 'cantidadA', 'volumenA', 'promoPagaA', 'promoLlevaA',
-    'nombreB','precioB', 'unidadB', 'cantidadB', 'volumenB', 'promoPagaB', 'promoLlevaB',
-    'ubicacionComparacion'
-  ].forEach((id) => {
-    $(id).addEventListener('input', saveFormData);
-    $(id).addEventListener('change', saveFormData);
-  });
+      [
+      'nombreA','precioA','unidadA','cantidadA','volumenA','promoPagaA','promoLlevaA',
+      'nombreB','precioB','unidadB','cantidadB','volumenB','promoPagaB','promoLlevaB',
+      'ubicacionOtra'
+      ].forEach((id) => {
+        $(id).addEventListener('input', saveFormData);
+        $(id).addEventListener('change', saveFormData);
+      });
+
+      $('ubicacionComparacion').addEventListener('change', handleLocationChange);
+      
+
+      function clearAllHistory() {
+        if (!confirm('Se eliminarán todas las comparaciones guardadas y todas las ubicaciones frecuentes.')) {
+          return;
+        }
+
+        localStorage.removeItem(HISTORY_KEY);
+        localStorage.removeItem(LOCATIONS_KEY);
+        renderHistorial();
+        renderLocationOptions();
+      }
 
 
     function getHistory() {
@@ -611,66 +649,147 @@ function saveFormData() {
       localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
     }
 
-    function guardarComparacion() {
-      alert('!')
-      const a = getProductData('A');
-      const b = getProductData('B');
-      const ubicacion = $('ubicacionComparacion').value.trim();
+    function getSavedLocations() {
+      const raw = localStorage.getItem(LOCATIONS_KEY);
+      if (!raw) return [];
 
-      if (a.precio <= 0 || a.cantidad <= 0 || a.volumen <= 0 || b.precio <= 0 || b.cantidad <= 0 || b.volumen <= 0) {
-        alert('Debes ingresar precio, cantidad y volumen válidos para ambos productos.');
-        return;
+      try {
+        const locations = JSON.parse(raw);
+        return Array.isArray(locations) ? locations : [];
+      } catch (error) {
+        console.error('No se pudieron leer las ubicaciones:', error);
+        return [];
       }
-
-      if (!ubicacion) {
-        alert('Debes ingresar la ubicación donde realizaste la comparación.');
-        return;
-      }
-
-      let resultado = 'Comparación no exacta';
-      let ganador = '';
-      let ahorroPorUnidad = 0;
-      let porcentajeAhorro = 0;
-
-      if (sameUnit(a, b)) {
-        const diff = Math.abs(a.precioUnitario - b.precioUnitario);
-
-        if (diff < 0.000001) {
-          resultado = 'Ambos productos convienen igual';
-          ganador = 'Empate';
-        } else {
-          const winner = a.precioUnitario < b.precioUnitario ? a : b;
-          const loser = winner === a ? b : a;
-          ahorroPorUnidad = loser.precioUnitario - winner.precioUnitario;
-          porcentajeAhorro = loser.precioUnitario > 0
-            ? ((ahorroPorUnidad / loser.precioUnitario) * 100)
-            : 0;
-
-          resultado = `Conviene más: ${winner.nombre}`;
-          ganador = winner.nombre;
-        }
-      }
-
-      const item = {
-        id: Date.now(),
-        fechaISO: new Date().toISOString(),
-        fechaTexto: new Date().toLocaleString('es-CL'),
-        ubicacion,
-        resultado,
-        ganador,
-        ahorroPorUnidad,
-        porcentajeAhorro,
-        productoA: a,
-        productoB: b
-      };
-
-      const history = getHistory();
-      history.unshift(item);
-      saveHistory(history);
-      renderHistorial();
-
-      alert('Comparación guardada correctamente.');
     }
+
+    function saveLocations(locations) {
+      localStorage.setItem(LOCATIONS_KEY, JSON.stringify(locations));
+    }
+
+    function addLocationIfMissing(location) {
+      const clean = (location || '').trim();
+      if (!clean) return;
+
+      const locations = getSavedLocations();
+      const exists = locations.some((item) => item.toLowerCase() === clean.toLowerCase());
+
+      if (!exists) {
+        locations.push(clean);
+        locations.sort((a, b) => a.localeCompare(b, 'es', { sensitivity: 'base' }));
+        saveLocations(locations);
+      }
+    }
+
+    function renderLocationOptions(selectedValue = '') {
+      const select = $('ubicacionComparacion');
+      const locations = getSavedLocations();
+
+      select.innerHTML = `
+        <option value="">Selecciona una ubicación</option>
+        ${locations.map((location) => `<option value="${location}">${location}</option>`).join('')}
+        <option value="__otro__">Otro...</option>
+      `;
+
+      if (selectedValue && locations.includes(selectedValue)) {
+        select.value = selectedValue;
+        $('ubicacionOtraField').style.display = 'none';
+        $('ubicacionOtra').value = '';
+      } else if (selectedValue) {
+        select.value = '__otro__';
+        $('ubicacionOtraField').style.display = 'block';
+        $('ubicacionOtra').value = selectedValue;
+      } else {
+        select.value = '';
+        $('ubicacionOtraField').style.display = 'none';
+        $('ubicacionOtra').value = '';
+      }
+    }
+
+    function getSelectedLocation() {
+      const selected = $('ubicacionComparacion').value;
+
+      if (selected === '__otro__') {
+        return $('ubicacionOtra').value.trim();
+      }
+
+      return selected.trim();
+    }
+
+    function handleLocationChange() {
+      const isOther = $('ubicacionComparacion').value === '__otro__';
+      $('ubicacionOtraField').style.display = isOther ? 'block' : 'none';
+
+      if (!isOther) {
+        $('ubicacionOtra').value = '';
+      }
+
+      saveFormData();
+    }
+
+
+function guardarComparacion() {
+  const a = getProductData('A');
+  const b = getProductData('B');
+  const ubicacion = getSelectedLocation();
+
+  if (a.precio <= 0 || a.cantidad <= 0 || a.volumen <= 0 || b.precio <= 0 || b.cantidad <= 0 || b.volumen <= 0) {
+    alert('Debes ingresar precio, cantidad y volumen válidos para ambos productos.');
+    return;
+  }
+
+  if (!ubicacion) {
+    alert('Debes ingresar o seleccionar la ubicación donde realizaste la comparación.');
+    return;
+  }
+
+  addLocationIfMissing(ubicacion);
+  renderLocationOptions(ubicacion);
+
+  let resultado = 'Comparación no exacta';
+  let ganador = '';
+  let ahorroPorUnidad = 0;
+  let porcentajeAhorro = 0;
+
+  if (sameUnit(a, b)) {
+    const diff = Math.abs(a.precioUnitario - b.precioUnitario);
+
+    if (diff < 0.000001) {
+      resultado = 'Ambos productos convienen igual';
+      ganador = 'Empate';
+    } else {
+      const winner = a.precioUnitario < b.precioUnitario ? a : b;
+      const loser = winner === a ? b : a;
+      ahorroPorUnidad = loser.precioUnitario - winner.precioUnitario;
+      porcentajeAhorro = loser.precioUnitario > 0
+        ? ((ahorroPorUnidad / loser.precioUnitario) * 100)
+        : 0;
+
+      resultado = `Conviene más: ${winner.nombre}`;
+      ganador = winner.nombre;
+    }
+  }
+
+  const item = {
+    id: Date.now(),
+    fechaISO: new Date().toISOString(),
+    fechaTexto: new Date().toLocaleString('es-CL'),
+    ubicacion,
+    resultado,
+    ganador,
+    ahorroPorUnidad,
+    porcentajeAhorro,
+    productoA: a,
+    productoB: b
+  };
+
+  const history = getHistory();
+  history.unshift(item);
+  saveHistory(history);
+  renderHistorial();
+  saveFormData();
+
+  alert('Comparación guardada correctamente.');
+}
 
 function renderHistorial() {
   const container = $('historialComparaciones');
@@ -678,6 +797,7 @@ function renderHistorial() {
 
   if (!history.length) {
     container.innerHTML = '<div><span class="muted">No hay comparaciones guardadas todavía.</span></div>';
+    
     return;
   }
 
@@ -688,8 +808,11 @@ function renderHistorial() {
       <div><span class="muted">Resultado:</span> ${item.resultado}</div>
       <div><span class="muted">${item.productoA.nombre}:</span> ${money(item.productoA.precioUnitario)} / ${item.productoA.unidad}</div>
       <div><span class="muted">${item.productoB.nombre}:</span> ${money(item.productoB.precioUnitario)} / ${item.productoB.unidad}</div>
-    </div>
+      <div>Ahorro por unidad ganador: <strong>${money(item.ahorroPorUnidad)}</strong></div>
+    <button id="btnEliminarHistorial" type="button" style="background:#ef4444; color:white;">Eliminar historial</button>
+          </div>
   `).join('');
+  $('btnEliminarHistorial').addEventListener('click', clearAllHistory);
 }
 
 
