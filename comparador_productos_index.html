@@ -334,13 +334,22 @@
           <small class="muted">Ejemplo 3x2: paga 2 y lleva 3.</small>
         </div>
       </article>
+
     </section>
+    <article class="card">
+      <div class="field">
+        <label for="ubicacionComparacion">Ubicación</label>
+        <input id="ubicacionComparacion" type="text" placeholder="Ej: Jumbo Maipú, Lider, Feria, etc." />
+      </div>
+    </article>
 
     <section class="card">
-      <div class="actions">
-        <button class="primary" id="btnCalcular">Comparar productos</button>
-        <button class="secondary" id="btnLimpiar" type="button">Limpiar</button>
-      </div>
+<div class="actions">
+  <button class="primary" id="btnCalcular">Comparar productos</button>
+  <button class="secondary" id="btnGuardar" type="button">Guardar comparación</button>
+  <button class="secondary" id="btnLimpiar" type="button">Limpiar</button>
+</div>
+
     </section>
 
     <section class="results" id="resultadoPanel" style="margin-top: 16px; display: none;">
@@ -360,7 +369,10 @@
         <div class="detail-list" id="resumenB"></div>
       </div>
     </section>
-
+<section class="card" style="margin-top: 16px;">
+  <h2 style="margin-bottom: 14px;">Historial de comparaciones</h2>
+  <div id="historialComparaciones" class="detail-list"></div>
+</section>
     <p class="footnote">Consejo: compara productos con la misma unidad de medida para obtener una comparación justa.</p>
   </div>
 
@@ -369,7 +381,10 @@
 
     const STORAGE_KEY = 'comparador_productos_formulario_v1';
 
-    //const HISTORY_KEY = 'comparador_productos_historial_v1';
+    const HISTORY_KEY = 'comparador_productos_historial_v1';
+
+    $('btnGuardar').addEventListener('click', guardarComparacion);
+    renderHistorial();
 
   function toNumber(value) {
     const n = parseFloat(value);
@@ -390,27 +405,29 @@
     }).format(value);
   }
 
-  function saveFormData() {
-    const data = {
-      nombreA: $('nombreA').value,
-      precioA: $('precioA').value,
-      unidadA: $('unidadA').value,
-      cantidadA: $('cantidadA').value,
-      volumenA: $('volumenA').value,
-      promoPagaA: $('promoPagaA').value,
-      promoLlevaA: $('promoLlevaA').value,
+function saveFormData() {
+  const data = {
+    nombreA: $('nombreA').value,
+    precioA: $('precioA').value,
+    unidadA: $('unidadA').value,
+    cantidadA: $('cantidadA').value,
+    volumenA: $('volumenA').value,
+    promoPagaA: $('promoPagaA').value,
+    promoLlevaA: $('promoLlevaA').value,
 
-      nombreB: $('nombreB').value,
-      precioB: $('precioB').value,
-      unidadB: $('unidadB').value,
-      cantidadB: $('cantidadB').value,
-      volumenB: $('volumenB').value,
-      promoPagaB: $('promoPagaB').value,
-      promoLlevaB: $('promoLlevaB').value
-    };
+    nombreB: $('nombreB').value,
+    precioB: $('precioB').value,
+    unidadB: $('unidadB').value,
+    cantidadB: $('cantidadB').value,
+    volumenB: $('volumenB').value,
+    promoPagaB: $('promoPagaB').value,
+    promoLlevaB: $('promoLlevaB').value,
 
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-  }
+    ubicacionComparacion: $('ubicacionComparacion').value
+  };
+
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
 
   function loadFormData() {
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -419,7 +436,11 @@
     try {
       const data = JSON.parse(raw);
 
-      $('nombreA').value = data.nombreA || '';
+      $('ubicacionComparacion').value = data.ubicacionComparacion || '';
+      $('nombreA').value = data.nombreA || 'Producto A';
+
+
+      //$('nombreA').value = data.nombreA || '';
       $('precioA').value = data.precioA || '';
       $('unidadA').value = data.unidadA || 'Gramos';
       $('cantidadA').value = data.cantidadA || '';
@@ -427,7 +448,8 @@
       $('promoPagaA').value = data.promoPagaA || '1';
       $('promoLlevaA').value = data.promoLlevaA || '1';
 
-      $('nombreB').value = data.nombreB || '';
+      $('nombreB').value = data.nombreB || 'Producto B';
+      //$('nombreB').value = data.nombreB || '';
       $('precioB').value = data.precioB || '';
       $('unidadB').value = data.unidadB || 'Gramos';
       $('cantidadB').value = data.cantidadB || '';
@@ -543,9 +565,11 @@
     function clearForm() {
       [
         'nombreA','precioA','cantidadA','volumenA','promoPagaA','promoLlevaA',
-        'nombreB','precioB','cantidadB','volumenB','promoPagaB','promoLlevaB'
-      ].forEach((id) => $(id).value = '');
+        'nombreB','precioB','cantidadB','volumenB','promoPagaB','promoLlevaB',
+        'ubicacionComparacion'
+      ].forEach((id) => $(id).value = '');      
 
+      $('ubicacionComparacion').value = '';
       $('nombreA').value = 'Producto A';
       $('nombreB').value = 'Producto B';
       $('unidadA').value = 'Gramos';
@@ -563,13 +587,113 @@
 
   [
     'nombreA','precioA', 'unidadA', 'cantidadA', 'volumenA', 'promoPagaA', 'promoLlevaA',
-    'nombreB','precioB', 'unidadB', 'cantidadB', 'volumenB', 'promoPagaB', 'promoLlevaB'
+    'nombreB','precioB', 'unidadB', 'cantidadB', 'volumenB', 'promoPagaB', 'promoLlevaB',
+    'ubicacionComparacion'
   ].forEach((id) => {
     $(id).addEventListener('input', saveFormData);
     $(id).addEventListener('change', saveFormData);
   });
 
-  loadFormData();
+
+    function getHistory() {
+      const raw = localStorage.getItem(HISTORY_KEY);
+      if (!raw) return [];
+
+      try {
+        return JSON.parse(raw);
+      } catch (error) {
+        console.error('No se pudo leer el historial:', error);
+        return [];
+      }
+    }
+
+    function saveHistory(history) {
+      localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+    }
+
+    function guardarComparacion() {
+      alert('!')
+      const a = getProductData('A');
+      const b = getProductData('B');
+      const ubicacion = $('ubicacionComparacion').value.trim();
+
+      if (a.precio <= 0 || a.cantidad <= 0 || a.volumen <= 0 || b.precio <= 0 || b.cantidad <= 0 || b.volumen <= 0) {
+        alert('Debes ingresar precio, cantidad y volumen válidos para ambos productos.');
+        return;
+      }
+
+      if (!ubicacion) {
+        alert('Debes ingresar la ubicación donde realizaste la comparación.');
+        return;
+      }
+
+      let resultado = 'Comparación no exacta';
+      let ganador = '';
+      let ahorroPorUnidad = 0;
+      let porcentajeAhorro = 0;
+
+      if (sameUnit(a, b)) {
+        const diff = Math.abs(a.precioUnitario - b.precioUnitario);
+
+        if (diff < 0.000001) {
+          resultado = 'Ambos productos convienen igual';
+          ganador = 'Empate';
+        } else {
+          const winner = a.precioUnitario < b.precioUnitario ? a : b;
+          const loser = winner === a ? b : a;
+          ahorroPorUnidad = loser.precioUnitario - winner.precioUnitario;
+          porcentajeAhorro = loser.precioUnitario > 0
+            ? ((ahorroPorUnidad / loser.precioUnitario) * 100)
+            : 0;
+
+          resultado = `Conviene más: ${winner.nombre}`;
+          ganador = winner.nombre;
+        }
+      }
+
+      const item = {
+        id: Date.now(),
+        fechaISO: new Date().toISOString(),
+        fechaTexto: new Date().toLocaleString('es-CL'),
+        ubicacion,
+        resultado,
+        ganador,
+        ahorroPorUnidad,
+        porcentajeAhorro,
+        productoA: a,
+        productoB: b
+      };
+
+      const history = getHistory();
+      history.unshift(item);
+      saveHistory(history);
+      renderHistorial();
+
+      alert('Comparación guardada correctamente.');
+    }
+
+function renderHistorial() {
+  const container = $('historialComparaciones');
+  const history = getHistory();
+
+  if (!history.length) {
+    container.innerHTML = '<div><span class="muted">No hay comparaciones guardadas todavía.</span></div>';
+    return;
+  }
+
+  container.innerHTML = history.map((item) => `
+    <div style="display:block; border-bottom:1px dashed rgba(107,114,128,0.25); padding:10px 0;">
+      <div><strong>${item.fechaTexto}</strong></div>
+      <div><span class="muted">Ubicación:</span> ${item.ubicacion}</div>
+      <div><span class="muted">Resultado:</span> ${item.resultado}</div>
+      <div><span class="muted">${item.productoA.nombre}:</span> ${money(item.productoA.precioUnitario)} / ${item.productoA.unidad}</div>
+      <div><span class="muted">${item.productoB.nombre}:</span> ${money(item.productoB.precioUnitario)} / ${item.productoB.unidad}</div>
+    </div>
+  `).join('');
+}
+
+
+    loadFormData();
 
   </script>
 </body>
